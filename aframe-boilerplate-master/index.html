@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>A-Frame Product Viewer</title>
+    <meta name="description" content="A professional A-Frame boilerplate for WebXR product viewing." />
+
+    <!-- A-Frame core -->
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <!-- Orbit controls component -->
+    <script src="https://unpkg.com/aframe-orbit-controls@0.3.0/dist/aframe-orbit-controls.min.js"></script>
+
+    <style>
+      html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial}
+      #overlay{position:fixed;left:1rem;top:1rem;z-index:999;color:#fff}
+      .btn{display:inline-block;background:rgba(0,0,0,0.5);border-radius:6px;padding:8px 10px;margin-right:8px;color:#fff;text-decoration:none;font-size:14px}
+      .label{background:rgba(0,0,0,0.4);padding:6px;border-radius:6px}
+      #credits{position:fixed;right:1rem;bottom:1rem;color:#fff;z-index:999;background:rgba(0,0,0,0.35);padding:8px;border-radius:6px}
+      a.btn:active{transform:translateY(1px)}
+    </style>
+  </head>
+  <body>
+
+    <div id="overlay">
+      <div class="label">A-Frame Product Viewer</div>
+      <div style="margin-top:8px">
+        <a href="#" id="reset" class="btn">Reset view</a>
+        <a href="#" id="toggle-bg" class="btn">Toggle background</a>
+        <a href="#" id="fullscreen" class="btn">Fullscreen</a>
+      </div>
+    </div>
+
+    <div id="credits">Tip: drag to rotate, scroll/pinch to zoom</div>
+
+    <a-scene background="color: #222" vr-mode-ui="enabled: true">
+
+      <a-assets>
+        <!-- Example glTF model - replace with your product model (.glb/.gltf) -->
+        <a-asset-item id="model" src="https://cdn.aframe.io/test-models/models/boombox/boombox.gltf"></a-asset-item>
+      </a-assets>
+
+      <!-- Camera with orbit controls (suitable for model inspection) -->
+      <a-entity id="cameraRig">
+        <a-entity id="camera"
+          camera="fov: 50"
+          position="0 1.6 3"
+          orbit-controls="target: 0 1 0;autoRotate: false;enableDamping:true;dampingFactor:0.125;rotateSpeed:0.3;zoomSpeed:1.2;maxDistance:12;minDistance:0.6;" >
+        </a-entity>
+      </a-entity>
+
+      <!-- Lighting -->
+      <a-entity light="type: ambient; intensity: 0.6"></a-entity>
+      <a-entity light="type: directional; intensity: 0.8" position="1 2 2"></a-entity>
+      <a-entity light="type: directional; intensity: 0.4" position="-1 1 -2"></a-entity>
+
+      <!-- Ground / shadow catcher -->
+      <a-plane rotation="-90 0 0" width="30" height="30" color="#111" position="0 0 0"></a-plane>
+
+      <!-- Model entity -->
+      <a-entity id="product" position="0 0 0" rotation="0 0 0" scale="1 1 1">
+        <a-gltf-model src="#model" position="0 0 0" rotation="0 0 0" shadow="receive: true" ></a-gltf-model>
+      </a-entity>
+
+      <!-- Simple environment: grid + axis helpers for desktop debugging -->
+      <a-gridline></a-gridline>
+
+    </a-scene>
+
+    <script>
+      // Simple UI actions
+      const camera = document.querySelector('#camera');
+      const scene = document.querySelector('a-scene');
+      const product = document.querySelector('#product');
+      let bgToggled = false;
+
+      document.getElementById('reset').addEventListener('click', (e)=>{
+        e.preventDefault();
+        // reset camera position through orbit-controls target/position
+        camera.setAttribute('position','0 1.6 3');
+        camera.setAttribute('orbit-controls','target: 0 1 0;');
+        product.setAttribute('rotation','0 0 0');
+        product.setAttribute('scale','1 1 1');
+      });
+
+      document.getElementById('toggle-bg').addEventListener('click',(e)=>{
+        e.preventDefault();
+        bgToggled = !bgToggled;
+        scene.setAttribute('background', bgToggled ? 'color: #f3f4f6' : 'color: #222');
+      });
+
+      document.getElementById('fullscreen').addEventListener('click',(e)=>{
+        e.preventDefault();
+        const el = document.documentElement;
+        if (el.requestFullscreen) el.requestFullscreen();
+        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+        else if (el.msRequestFullscreen) el.msRequestFullscreen();
+      });
+
+      // Mobile note: A-Frame requires a user gesture to enter XR on some platforms.
+    </script>
+
+  </body>
+</html>
